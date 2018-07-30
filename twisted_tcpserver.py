@@ -69,13 +69,11 @@ class Echo(protocol.Protocol):#处理事件程序
 				
 				mydebug.PrintLogger("variable len!!!")
 		
-			else : #不是正确的指令	
-			    
-                            mydebug.PrintLogger("data error -len") 
-                     
-                            self.transport.abortConnection()
+			else: #不是正确的指令	         
 
-                            break
+				mydebug.PrintLogger("cmd error,cuting down connection!!!")
+				self.transport.abortConnection()
+				break
 			
 
 	def SEND(self,uuid,databody):
@@ -239,8 +237,12 @@ class EchoFactory(protocol.Factory):
 
 if __name__ == '__main__':
 
-	mydebug=debug.Debug(argv[1])
-	
+	if os.name!='nt':
+
+		mydebug=debug.Debug(argv[1])
+	else:
+		mydebug=debug.Debug(True)
+
 	Devfactory=EchoFactory()
 
 	reactor.listenTCP(8001,Devfactory)
