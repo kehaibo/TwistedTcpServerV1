@@ -1,12 +1,10 @@
 #TCPSerever
 #-*_ coding:utf-8 -*-
 import os
-'''if os.name !='nt':
-    from twisted.internet import epollreator
-	epollreator.install()
-else:
+if os.name =='nt':
 	from twisted.internet import iocpreactor
-	iocpreactor.install()'''
+	iocpreactor.install()
+
 from twisted.internet import reactor,protocol
 from twisted.python import log
 from sys import argv
@@ -19,10 +17,6 @@ import binascii
 import pymysql
 import struct
 
-ConnectNum=0
-ConnetNum_MAX=0
-ConnetLost_Num=0
-
 
 class Echo(protocol.Protocol):#处理事件程序
 
@@ -32,6 +26,10 @@ class Echo(protocol.Protocol):#处理事件程序
 		self.client_datastr=''
 		self.databuf=list()
 		self.datalen=int()
+		if os.name =='nt':
+			self.loglocal = 'E:\Python-L\TwistedTcpServerV1\log\log.txt'
+		else:
+			self.loglocal='/home/Iotserver/TwistedTcpServerV1/log/log.txt'
 	
 	def dataReceived(self,data):
 
@@ -40,17 +38,6 @@ class Echo(protocol.Protocol):#处理事件程序
 		cliend_data=list(map(lambda s:s,data))#字符串转list
 
 		#mydebug.PrintLogger(cliend_data)		
-		
-	#	try:
-
-	#		with open('/home/tmp/tcp server/log/log.txt','a') as Logmsg:
-	
-	#			Logmsg.write("undisposed data:{}\n ".format(data))
-
-	#	except :
-
-	#		mydebug.PrintLogger("信息无法写入日志或路径问题at{}\n".format(time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime()))) 			
-							
 
 		mydebug.PrintLogger("Revice INFO from :{} data:{} at {}\n".format(self.transport.getPeer(),data,time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())))	
 		
@@ -61,11 +48,11 @@ class Echo(protocol.Protocol):#处理事件程序
 		while self.datalen:
 
 			
-			if cliend_data[1]==0xFF: #判断是否为固定长度指令数据
+			if cliend_data[1]==0xFF and cliend_data[0]==0x15 : #判断是否为固定长度指令数据
 
 				self.dataanalysis(cliend_data)			
 					
-			elif cliend_data[1]==0xFE: #判断是否为不定长度指令数据，透传等..
+			elif cliend_data[1]==0xFE and cliend_data[0]==0x15: #判断是否为不定长度指令数据，透传等..
 				
 				mydebug.PrintLogger("variable len!!!")
 		
@@ -75,7 +62,6 @@ class Echo(protocol.Protocol):#处理事件程序
 				self.transport.abortConnection()
 				break
 			
-
 	def SEND(self,uuid,databody):
 
 		try :
@@ -98,15 +84,16 @@ class Echo(protocol.Protocol):#处理事件程序
 		@type reason: L{twisted.python.failure.Failure}
 		"""
 
-		global ConnectNum
+		global ConnectNum,ConnetNum_Max
 
 		ConnectNum = ConnectNum - 1
 		
-		mydebug.PrintLogger("{} device disconnected \n ConnectNum: {}\n".format(self.transport.getPeer(),ConnectNum))
+		mydebug.PrintLogger("{} device disconnected,the ConnectNum: {}, the max ConnectNum {} at {} \n"
+							.format(self.transport.getPeer(),ConnectNum,ConnetNum_Max,time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))
             
 		try:
 
-			with open('/home/tmp/tcp server/log/log.txt','a') as Logmsg:
+			with open(self.loglocal,'a') as Logmsg:
 
 				Logmsg.write("{} disconnected,ConnectNum is {} at {} \n ".format(self.transport.getPeer(),ConnectNum,time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))
 
@@ -120,31 +107,29 @@ class Echo(protocol.Protocol):#处理事件程序
 
 		#self.globalv.set()
 
-		global ConnectNum,ConnectNum_MAX,ConnectLost_Num
+		global ConnectNum
+		global ConnetNum_Max
+		global ConnectLost_Num
 
 		ConnectNum = ConnectNum + 1
 
-     #   if ConnectNum_MAX < ConnectNum:
+		if ConnetNum_Max < ConnectNum:
 
-            
-   #          ConnectNum_MAX = ConnectNum
+			ConnetNum_Max = ConnectNum
+		else:
+			ConnectLost_Num = ConnetNum_Max - ConnectNum
 
-    #    else :
-            
-     #       ConnectLost_Num = ConnectNum_MAX-ConnectNum
-     #       try :
-     #           with open('/home/tmp/tcp server/log/lost.txt','a') as f:
-     #               f.write("{} Connect Lost,ConnectLostNum:{} at {}\n ".format(self.transport.getPeer(),ConnectLost_Num,time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime()))) 
-     
 		try:
 
-			with open('/home/tmp/tcp server/log/log.txt','a') as Logmsg:
+			with open(self.loglocal,'a') as Logmsg:
 
-				Logmsg.write("{} login success,ConnectNum is {} at {}\n ".format(self.transport.getPeer(),ConnectNum,time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))
+				Logmsg.write("{} login success,the ConnectNum is {} ,the max connectNum is {} at {}\n "
+					.format(self.transport.getPeer(),ConnectNum,ConnetNum_Max,time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))
 
 		except :
 
 			print("信息无法写入日志或路径问题 at {}\n".format(time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))
+		
 		mydebug.PrintLogger("{} login success,ConnectNum is {} \n ".format(self.transport.getPeer(),ConnectNum))
 		
 	def dataanalysis(self,cliend_data):
@@ -153,43 +138,65 @@ class Echo(protocol.Protocol):#处理事件程序
 				
 		if cliend_data[2]==0x01:#电表设备
 		
-			markindex = int(cliend_data.index(0x15))
-					
-			self.databuf=cliend_data[markindex:cliend_data[0]]#数据体切割
+			try:
 
-			CRCL,CRCH=CRC16.CRC16_1(self.databuf[:-2],len(self.databuf[:-2]))#crc校验
-
-			if CRCL==self.databuf[-2] and CRCH==self.databuf[-1]:
-
-				mydebug.PrintLogger("data:{}".format(self.databuf))
-
-				try:
-
-					with open('/home/tmp/tcp server/log/log.txt','a') as Logmsg:
-
-						Logmsg.write(" disposed data :{} at {}\n ".format(self.databuf,time.strftime("%Y-%m_%d %H:%M:%S",time.localtime())))
-
-				except :
-
-					mydebug.PrintLogger("信息无法写入日志或路径问题at{}\n".format(time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime()))) 			
-				
-				del cliend_data[markindex:markindex+int(cliend_data[0])]#删除数据体已经截取的部分
-	
-				self.datalen=self.datalen-0x15
-					
-			else : #数据错误
-
-				with open('/home/tmp/tcp server/log/log.txt','a') as logmsg:
-
-					logmsg.write("error data :{}".format(self.databuf))			
-	
-				mydebug.PrintLogger("crc not pass!")
-				
-				self.datalen=self.datalen-0x15
+				markindex = int(cliend_data.index(0x15))
 			
-				if self.datalen<=0:
+			except ValueError:
+
+				mydebug.PrintLogger("data error!")
+				self.transport.abortConnection()
+
+			try:
+			
+				self.databuf=cliend_data[markindex:cliend_data[0]]#数据体切割
+
+			except UnboundLocalError:
+
+				mydebug.PrintLogger("data error!")
+				self.transport.abortConnection()
+
+			try:
+
+
+				CRCL,CRCH=CRC16.CRC16_1(self.databuf[:-2],len(self.databuf[:-2]))#crc校验
+
+				if CRCL==self.databuf[-2] and CRCH==self.databuf[-1]:
+
+					mydebug.PrintLogger("data:{}".format(self.databuf))
+
+					try:
+
+						with open(self.loglocal,'a') as Logmsg:
+
+							Logmsg.write(" disposed data :{} at {}\n ".format(self.databuf,time.strftime("%Y-%m_%d %H:%M:%S",time.localtime())))
+
+					except :
+
+						mydebug.PrintLogger("信息无法写入日志或路径问题at{}\n".format(time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime()))) 			
+					
+					del cliend_data[markindex:markindex+int(cliend_data[0])]#删除数据体已经截取的部分
+		
+					self.datalen=self.datalen-0x15
+						
+				else : #数据错误
+
+					with open(self.loglocal,'a') as logmsg:
+
+						logmsg.write("error data :{}".format(self.databuf))			
+		
+					mydebug.PrintLogger("crc not pass!")
+					
+					self.datalen=self.datalen-0x15
 				
-					self.datalen=0								
+					if self.datalen<=0:
+					
+						self.datalen=0
+			except 	IndexError :
+
+				mydebug.PrintLogger("data error!")
+				self.transport.abortConnection()
+
 
 		elif cliend_data[2]==0x02:#空调设备
 
@@ -237,11 +244,15 @@ class EchoFactory(protocol.Factory):
 
 if __name__ == '__main__':
 
+	ConnectNum=0
+	ConnetNum_Max=0
+	ConnetLost_Num=0
+
 	if os.name!='nt':
 
 		mydebug=debug.Debug(argv[1])
 	else:
-		mydebug=debug.Debug(True)
+		mydebug=debug.Debug("True")
 
 	Devfactory=EchoFactory()
 
