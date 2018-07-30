@@ -1,4 +1,5 @@
-#！/usr/bin/python3.5
+#-*- coding:utf-8 -*-
+import binascii
 __all__=['CRC16_1']
 
 chCRCHTalbe=[0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
@@ -52,31 +53,24 @@ chCRCLTalbe=[
 
 def CRC16_1(pchMsg, wDataLen):
 
+	p=[i for i in pchMsg]
+
 	chCRCHi = 0xFF;		        
 	chCRCLo = 0xFF;	        
-	wIndex=0;
-	i=0;
-	p=bytes(pchMsg,encoding="utf-8")			   
-	while wDataLen: 
-		if p[i]>=0x37 :            
-			h=(p[i]-0x37)<<4
-		else:
-			h=((p[i]+0x07)-0x37)<<4;
-		if p[i+1] >=0x37:
-			l=(p[i+1]-0x37) 
-		else:
-			l=((p[i+1]+0x07)-0x37) 		
-		d=h+l;           
-		wIndex =chCRCLo^d;
+	wIndex=0x00;
+	i=0
+
+	while wDataLen : 
+		wIndex =chCRCLo^p[i];
 		chCRCLo = chCRCHi^ chCRCHTalbe[wIndex]                  
 		chCRCHi = chCRCLTalbe[wIndex]
-		i=i+2
+		i=i+1
 		wDataLen=wDataLen-1
-	return "%X"%(chCRCHi  | (chCRCLo<<8))
 
-''' if __name__ == '__main__':
+	return [chCRCLo,chCRCHi]
 
-	cmd="FC120000000000000000000000B00101"
-	crc_d=CRC16_1(cmd,len(cmd)/2)
-	cmd=cmd+crc_d
-	print(cmd)'''
+if __name__ == '__main__':
+
+	UUID = [0x15,0Xff,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x10,0x00,0x00]
+	UUID[-2],UUID[-1]=CRC16_1(UUID[:-2],len(UUID[:-2]))
+	print(UUID)
