@@ -1,14 +1,15 @@
+
 class DBCmd:
 
 	def __init__(self,uuid):
 
 		self.uuid=uuid
 
-		self.read_power='FC12'+str(uuid).upper()+'B00100'
+		self.read_power=b'15FF01000000000000000000000101000000004042'
 
-		self.read_addr ='FC12'+str(uuid).upper()+'B00300'
+		self.read_addr =''
 
-		self.openorclose='FC16'+str(uuid).upper()+'B00B01'
+		self.openorclose=''
 
 
 	def OpenorClose(self,open_or_close):

@@ -7,58 +7,72 @@ if os.name =='nt':
 
 from twisted.internet import reactor,protocol
 from twisted.python import log
+from cmdanalysis  import analysiscmd
+from adbmysql import adbmysql
 from sys import argv
 from cmd import cmd
 from CRC16 import CRC16
 from comm import comm
-from debug import debug 
 import time
 import binascii
 import pymysql
+import pymysql.cursors
 import struct
+import logging
 
 
 class Echo(protocol.Protocol):#处理事件程序
 
 	def __init__(self):
 
+		global loglocal
 		self.globalv=comm.GlobalValue()
 		self.client_datastr=''
 		self.databuf=list()
 		self.datalen=int()
-		if os.name =='nt':
-			self.loglocal = 'E:\Python-L\TwistedTcpServerV1\log\log.txt'
+		self.uuid = ''
+		self.temp = ''
+		self.loglocal = loglocal
+		self.mylogger=logging.getLogger()
+		stdprintf = logging.StreamHandler()
+		if os.name !='nt':
+			if argv[1]=='True':
+				self.mylogger.addHandler(stdprintf)
 		else:
-			self.loglocal='/home/Iotserver/TwistedTcpServerV1/log/log.txt'
-	
+			self.mylogger.addHandler(stdprintf)
+		
 	def dataReceived(self,data):
 
 		#cliend_data=binascii.b2a_hex(data) #ASIIC码转16字符
 
-		cliend_data=list(map(lambda s:s,data))#字符串转list
-
-		#mydebug.PrintLogger(cliend_data)		
-
-		mydebug.PrintLogger("Revice INFO from :{} data:{} at {}\n".format(self.transport.getPeer(),data,time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())))	
+		cliend_data=list(map(lambda s:s,data))#字符串转list		
 		
 		self.datalen=len(data)
 
-		#mydebug.PrintLogger(self.datalen)
-	
 		while self.datalen:
 
-			
-			if cliend_data[1]==0xFF and cliend_data[0]==0x15 : #判断是否为固定长度指令数据
+			if  cliend_data[0]==0x15 and cliend_data[1]==0xFF: #判断是否为固定长度指令数据
 
-				self.dataanalysis(cliend_data)			
+				if cliend_data[2]==0x01:#电表设备
+
+					dbobj=analysiscmd.DBcmdanalysic(cliend_data,self.datalen,self.transport.getPeer())
+					self.datalen=dbobj.getdata(adbmysql.TwistedMysql.interctionthread,**data1)
+
+				elif cliend_data[2]==0x02:#空调设备
+
+					self.mylogger.info("KT device")					
+
+				else: #不是正确的指令
+							
+					self.mylogger.info("NO this type device")
 					
 			elif cliend_data[1]==0xFE and cliend_data[0]==0x15: #判断是否为不定长度指令数据，透传等..
 				
-				mydebug.PrintLogger("variable len!!!")
+				self.mylogger.info("variable len!!!")
 		
 			else: #不是正确的指令	         
 
-				mydebug.PrintLogger("cmd error,cuting down connection!!!")
+				self.mylogger.info("{} cmd error,cuting down connection!!! \n".format(self.transport.getPeer()))
 				self.transport.abortConnection()
 				break
 			
@@ -72,7 +86,7 @@ class Echo(protocol.Protocol):#处理事件程序
 
 		except AttributeError:
 
-			mydebug.PrintLogger('ERROR :Django client not login\n')
+			self.mylogger.info('ERROR :Django client not login\n')
 
 	def connectionLost(self, reason):
 		"""
@@ -87,22 +101,10 @@ class Echo(protocol.Protocol):#处理事件程序
 		global ConnectNum,ConnetNum_Max
 
 		ConnectNum = ConnectNum - 1
-		
-		mydebug.PrintLogger("{} device disconnected,the ConnectNum: {}, the max ConnectNum {} at {} \n"
-							.format(self.transport.getPeer(),ConnectNum,ConnetNum_Max,time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))
-            
-		try:
 
-			with open(self.loglocal,'a') as Logmsg:
-
-				Logmsg.write("{} disconnected,ConnectNum is {} at {} \n ".format(self.transport.getPeer(),ConnectNum,time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))
-
-		except :
-
-			print("信息无法写入日志或路径问题 at {}\n".format(time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))
-		
-	     
-
+		logging.info("{} device disconnected,the ConnectNum: {}, the max ConnectNum {}\n"
+					.format(self.transport.getPeer(),ConnectNum,ConnetNum_Max))    
+	
 	def connectionMade(self):
 
 		#self.globalv.set()
@@ -118,121 +120,14 @@ class Echo(protocol.Protocol):#处理事件程序
 			ConnetNum_Max = ConnectNum
 		else:
 			ConnectLost_Num = ConnetNum_Max - ConnectNum
-
-		try:
-
-			with open(self.loglocal,'a') as Logmsg:
-
-				Logmsg.write("{} login success,the ConnectNum is {} ,the max connectNum is {} at {}\n "
-					.format(self.transport.getPeer(),ConnectNum,ConnetNum_Max,time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))
-
-		except :
-
-			print("信息无法写入日志或路径问题 at {}\n".format(time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))
-		
-		mydebug.PrintLogger("{} login success,ConnectNum is {} \n ".format(self.transport.getPeer(),ConnectNum))
-		
-	def dataanalysis(self,cliend_data):
-
-		mydebug.PrintLogger("fix len data")
-				
-		if cliend_data[2]==0x01:#电表设备
-		
-			try:
-
-				markindex = int(cliend_data.index(0x15))
-			
-			except ValueError:
-
-				mydebug.PrintLogger("data error!")
-				self.transport.abortConnection()
-
-			try:
-			
-				self.databuf=cliend_data[markindex:cliend_data[0]]#数据体切割
-
-			except UnboundLocalError:
-
-				mydebug.PrintLogger("data error!")
-				self.transport.abortConnection()
-
-			try:
-
-
-				CRCL,CRCH=CRC16.CRC16_1(self.databuf[:-2],len(self.databuf[:-2]))#crc校验
-
-				if CRCL==self.databuf[-2] and CRCH==self.databuf[-1]:
-
-					mydebug.PrintLogger("data:{}".format(self.databuf))
-
-					try:
-
-						with open(self.loglocal,'a') as Logmsg:
-
-							Logmsg.write(" disposed data :{} at {}\n ".format(self.databuf,time.strftime("%Y-%m_%d %H:%M:%S",time.localtime())))
-
-					except :
-
-						mydebug.PrintLogger("信息无法写入日志或路径问题at{}\n".format(time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime()))) 			
-					
-					del cliend_data[markindex:markindex+int(cliend_data[0])]#删除数据体已经截取的部分
-		
-					self.datalen=self.datalen-0x15
-						
-				else : #数据错误
-
-					with open(self.loglocal,'a') as logmsg:
-
-						logmsg.write("error data :{}".format(self.databuf))			
-		
-					mydebug.PrintLogger("crc not pass!")
-					
-					self.datalen=self.datalen-0x15
-				
-					if self.datalen<=0:
-					
-						self.datalen=0
-			except 	IndexError :
-
-				mydebug.PrintLogger("data error!")
-				self.transport.abortConnection()
-
-
-		elif cliend_data[2]==0x02:#空调设备
-
-			mydebug.PrintLogger("KT device")					
-
-		else: #不是正确的指令
-					
-			mydebug.PrintLogger("NO this type device")
-					
-						
-	def datahandle(self,cliend_data):
-
-		if cliend_data[0:2]==b'fb':#设备登录
-
-			#print(str(cliend_data[4:25])+str(data[4:25]))
-
-			if cliend_data[2:4]==b'0b'and cliend_data[27:]==b'':
-
-				uuid =struct.pack('22s',cliend_data[4:27])
-
-				if uuid not in self.globalv.checkkeys():
-
-					self.globalv.set(uuid,self.transport)
-
-				else:
-
-					mydebug.PrintLogger('ERROR :device existed')
-
-			if  cliend_data[26:30]== b'b002':#设备数据
-
-				datalen= str(len(cliend_data)-26)+'s'
-
-				databody=struct.pack(datalen,cliend_data[26:])
-
-				print(databody)
-
+#		try:
+#			with open(self.loglocal,'a') as Logmsg
+#				Logmsg.write("{} login success,the ConnectNum is {} ,the max connectNum is {} at {}\n "
+#					.format(self.transport.getPeer(),ConnectNum,ConnetNum_Max,time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))
+#		except :
+#			print("信息无法写入日志或路径问题 at {}\n".format(time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))	
+		logging.info("{} login success,the ConnectNum is {} ,the max connectNum is {}\n "
+					.format(self.transport.getPeer(),ConnectNum,ConnetNum_Max))	
 						
 	
 class EchoFactory(protocol.Factory):
@@ -248,20 +143,38 @@ if __name__ == '__main__':
 	ConnetNum_Max=0
 	ConnetLost_Num=0
 
-	if os.name!='nt':
+	kw  =	{   'host':'127.0.0.1',
+				'port':3306,
+				'user':'root',
+				'passwd':'',
+				'db':'device',
+				'cursorclass':pymysql.cursors.DictCursor,
+				'use_unicode':True,
+				'charset':'utf8'
+			} 
+	data1 = {	'table':'dbdevice',
+				'UUID':'',
+				'TOTAL_POWER':'',
+				'ONOFF':'OFF'
+			}
 
-		mydebug=debug.Debug(argv[1])
+	if os.name =='nt':
+		loglocal = 'E:\Python-L\TwistedTcpServerV1\log\log.txt'
 	else:
-		mydebug=debug.Debug("True")
+		loglocal='/home/Iotserver/TwistedTcpServerV1/log/log.txt'
+
+	adbmysql.TwistedMysql.connectsetting(**kw)
+	#TwistedMysql.interctionthread(**data)
+
+	logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+								datefmt='%a,%d %b %Y %H:%M:%S',
+                				filename=loglocal,
+                				filemode='a')																																																																																																																																																																																																																																		
 
 	Devfactory=EchoFactory()
 
 	reactor.listenTCP(8001,Devfactory)
 
 	print("Listening....\n")
-
-#	with open('E:\\Python-L\\twisted_file\\tcp server\\log\\log.txt','a') as Logmsg:
-
-#			Logmsg.write("{} login success\n".format(self.transport.getPeer()))
-
+ 
 	reactor.run()
