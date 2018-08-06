@@ -1,14 +1,15 @@
 import os
 if os.name != 'nt':
 	import sys
-	sys.path.append(r'/home/Iotserver/TwistedTcpServerV1')
+	sys.path.append(r'/home/Iotserver/TwistedTcpServerV3-addadbapi')
 else:
 	import sys
-	sys.path.append(r'E:\Python-L\TwistedTcpServerV1')
+	sys.path.append(r'E:\Python-L\TwistedTcpServerV3-addadbapi')
 from CRC16 import CRC16
 from cmdanalysis  import analysiscmd
 import logging
 import time
+from datetime import datetime
 
 
 
@@ -25,12 +26,12 @@ class CmdAnalysic(object):
 		self.mylogger.setLevel
 		stdprintf = logging.StreamHandler()
 		if os.name !='nt':
-			outputfile = logging.FileHandler('/home/Iotserver/TwistedTcpServerV1/log/data.txt')
+			outputfile = logging.FileHandler('/home/Iotserver/TwistedTcpServerV3-addadbapi/log/data.txt')
 			self.mylogger.addHandler(outputfile)
 			if argv[1]=='True':
 				self.mylogger.addHandler(stdprintf)
 		else:
-			outputfile = logging.FileHandler('E:\Python-L\TwistedTcpServerV1\log\data.txt')
+			outputfile = logging.FileHandler('E:\Python-L\TwistedTcpServerV3-addadbapi\log\data.txt')
 			self.mylogger.addHandler(outputfile)
 
 
@@ -71,8 +72,6 @@ class DBcmdanalysic(CmdAnalysic):
 
 		power = self.data[15]<<32|self.data[16]<<8|self.data[17]
 
-		print(power)
-
 		self.power = str(power)+'.'+str(self.data[18])
 		
 		return self.power
@@ -89,7 +88,8 @@ class DBcmdanalysic(CmdAnalysic):
 		
 		except ValueError:
 
-			self.transport.abortConnection()
+			#self.transport.abortConnection()
+			self.datalen=0 #出现乱码时，直接退出本次数据处理过程
 
 		try:
 		
@@ -97,7 +97,7 @@ class DBcmdanalysic(CmdAnalysic):
 
 		except UnboundLocalError:
 
-			self.transport.abortConnection()
+			self.datalen=0 #出现乱码时，直接退出本次数据处理过程
 
 		try:
 
@@ -109,12 +109,12 @@ class DBcmdanalysic(CmdAnalysic):
 
 					kwagrs['UUID']=self.getuuid()
 					kwagrs['TOTAL_POWER']=self.gettotalpower()
+					kwagrs['TIMES']=datetime.strptime(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),"%Y-%m-%d %H:%M:%S")
+					self.mylogger.info("DB Recive data :{} from {}\n ".format(databuf,self.device_ip))	
 					function(**kwagrs)
 				else:
 
-					raise Exception('data type error')
-
-				self.mylogger.info("Recive data :{} from {}\n ".format(databuf,self.device_ip))				
+					raise Exception('data type error')			
 				
 				del self.data[markindex:markindex+int(self.data[0])]#删除数据体已经截取的部分
 				
@@ -132,7 +132,7 @@ class DBcmdanalysic(CmdAnalysic):
 
 		except 	IndexError :
 
-			self.transport.abortConnection()
+			self.datalen=0 #出现乱码时，直接退出本次数据处理过程
 
 		return self.datalen
 

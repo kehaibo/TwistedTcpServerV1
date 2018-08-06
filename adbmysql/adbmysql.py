@@ -1,6 +1,7 @@
 #-*- coding : utf-8 -*-
 from twisted.enterprise import adbapi
 import pymysql
+import logging
 
 class TwistedMysql(object):
 	"""docstring for  TwistedMysql  异步使用mysql"""
@@ -16,24 +17,22 @@ class TwistedMysql(object):
 
 		'''初始化mysql异步连接池'''
 
-		cls.dbpooldict['dbpool'] = adbapi.ConnectionPool("pymysql",kwargs) 
+		cls.dbpooldict['dbpool'] = adbapi.ConnectionPool("pymysql",**kwargs) 
 
 	@classmethod
 	def interctionthread(cls,**kwargs):
 
 		'''异步数据库操作初始化线程启动，以及注册方式错误回调函数'''
+		try:
 
-		print(cls.dbpooldict)
-		print('interctionthread'+str(kwargs))
+			query=cls.dbpooldict['dbpool'].runInteraction(cls.insterdata,**kwargs)
+			#query=cls.dbpooldict['dbpool'].runInteraction(cls.insterdatatest)
 
-		#query=self.connectsetting().runInteraction(self.insterdata,**kwargs)
-		query=cls.dbpooldict['dbpool'].runInteraction(cls.insterdatatest)
+			query.addErrback(cls.errorhanle)
 
-		print ("end"+str(query))
+		except Exception as e:
 
-		query.addErrback(cls.errorhanle)
-
-		query.addCallback(cls.errorhanle)
+			logging.info(e)
 
 		
 	@classmethod
@@ -44,20 +43,24 @@ class TwistedMysql(object):
 	@classmethod
 	def insterdatatest(cls,cursor):
 		''' 插入数据'''
-		data=[d for d in kwargs.keys()]
-
 		inter_information = "INSERT INTO dbdevice (UUID,TOTAL_POWER,ONOFF) VALUES ('000000000002','222.44','OFF')"
 		cursor.execute(inter_information)
 
-	def insterdata(self,cursor,**kwargs):
+	@classmethod
+	def insterdata(cls,cursor,**kwargs):
 		''' 插入数据'''
-		print (inter_information)
-		data=[d for d in kwargs.keys()]
+		try:
+			data=[d for d in kwargs.keys()]
 
-		inter_information = 'INSERT INTO {} ({},{},{}) VALUES ({},{},{})'\
-							.format(kwargs['table'],data[1],data[2],data[3],kwargs['UUID'],kwargs['TOTAL_POWER'],kwargs['ONOFF'])
-		print (inter_information)
-		cursor.execute(inter_information)
+			inter_information = "INSERT INTO {} ({},{},{},{}) VALUES (\'{}\',\'{}\',\'{}\',\'{}\')"\
+								.format(kwargs['table'],data[1],data[2],data[3],data[4],kwargs['UUID'],kwargs['TOTAL_POWER'],kwargs['ONOFF'],kwargs['TIMES'])
+			cursor.execute(inter_information)
+			logging.info(inter_information)
+
+		except Exception as e:
+
+			logging.info('sql error:'+str(e))
+
 
 		
 

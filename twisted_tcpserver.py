@@ -9,6 +9,7 @@ from twisted.internet import reactor,protocol
 from twisted.python import log
 from cmdanalysis  import analysiscmd
 from adbmysql import adbmysql
+from twisted.enterprise import adbapi
 from sys import argv
 from cmd import cmd
 from CRC16 import CRC16
@@ -56,7 +57,8 @@ class Echo(protocol.Protocol):#处理事件程序
 				if cliend_data[2]==0x01:#电表设备
 
 					dbobj=analysiscmd.DBcmdanalysic(cliend_data,self.datalen,self.transport.getPeer())
-					self.datalen=dbobj.getdata(adbmysql.TwistedMysql.interctionthread,**data1)
+					#adbmysql.TwistedMysql.connectsetting(**db_settings)
+					self.datalen=dbobj.getdata(adbmysql.TwistedMysql.interctionthread,**dbdatamodel)
 
 				elif cliend_data[2]==0x02:#空调设备
 
@@ -143,27 +145,28 @@ if __name__ == '__main__':
 	ConnetNum_Max=0
 	ConnetLost_Num=0
 
-	kw  =	{   'host':'127.0.0.1',
-				'port':3306,
-				'user':'root',
-				'passwd':'',
-				'db':'device',
-				'cursorclass':pymysql.cursors.DictCursor,
-				'use_unicode':True,
-				'charset':'utf8'
-			} 
-	data1 = {	'table':'dbdevice',
-				'UUID':'',
-				'TOTAL_POWER':'',
-				'ONOFF':'OFF'
-			}
+	mysqlsetting =	{   'host':'localhost',
+						'port':3306,
+						'user':'root',
+						'passwd':'',
+						'db':'device',
+						'use_unicode':True,
+						'charset':'utf8'
+					} 
+	dbdatamodel = {	
+					'table':'dbdevice',
+					'UUID':'',
+					'TOTAL_POWER':'',
+					'ONOFF':'OFF',
+					'TIMES':''
+				}
 
 	if os.name =='nt':
-		loglocal = 'E:\Python-L\TwistedTcpServerV1\log\log.txt'
+		loglocal = 'E:\Python-L\TwistedTcpServerV3-addadbapi\log\log.txt'
 	else:
-		loglocal='/home/Iotserver/TwistedTcpServerV1/log/log.txt'
+		loglocal='/home/Iotserver/TwistedTcpServerV3-addadbapi/log/log.txt'
 
-	adbmysql.TwistedMysql.connectsetting(**kw)
+	adbmysql.TwistedMysql.connectsetting(**mysqlsetting)
 	#TwistedMysql.interctionthread(**data)
 
 	logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',

@@ -182,3 +182,67 @@ Fri,03 Aug 2018 17:58:08 twisted_tcpserver.py[line:130] INFO IPv4Address(TCP, '1
  
 Fri,03 Aug 2018 17:58:10 analysiscmd.py[line:117] INFO Recive data :[21, 255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 16, 64, 66] from IPv4Address(TCP, '192.168.0.111', 50861)
  
+Mon,06 Aug 2018 10:13:26 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 58370) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 10:14:38 analysiscmd.py[line:113] INFO DB Recive data :[21, 255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 16, 64, 66] from IPv4Address(TCP, '192.168.0.103', 58370)
+ 
+Mon,06 Aug 2018 10:19:06 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 58618) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 10:19:07 analysiscmd.py[line:113] INFO DB Recive data :[21, 255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 16, 64, 66] from IPv4Address(TCP, '192.168.0.103', 58618)
+ 
+Mon,06 Aug 2018 10:21:54 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 58642) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 10:21:56 analysiscmd.py[line:113] INFO DB Recive data :[21, 255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 16, 64, 66] from IPv4Address(TCP, '192.168.0.103', 58642)
+ 
+Mon,06 Aug 2018 10:22:25 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 58646) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 10:22:26 analysiscmd.py[line:113] INFO DB Recive data :[21, 255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 16, 64, 66] from IPv4Address(TCP, '192.168.0.103', 58646)
+ 
+Mon,06 Aug 2018 10:24:24 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 58667) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 10:24:25 analysiscmd.py[line:113] INFO DB Recive data :[21, 255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 16, 64, 66] from IPv4Address(TCP, '192.168.0.103', 58667)
+ 
+Mon,06 Aug 2018 10:25:59 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 58683) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 10:26:00 analysiscmd.py[line:113] INFO DB Recive data :[21, 255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 16, 64, 66] from IPv4Address(TCP, '192.168.0.103', 58683)
+ 
+Mon,06 Aug 2018 10:26:00 adbmysql.py[line:38] INFO name 'self' is not defined
+Mon,06 Aug 2018 10:26:27 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 58687) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 10:26:28 analysiscmd.py[line:113] INFO DB Recive data :[21, 255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 16, 64, 66] from IPv4Address(TCP, '192.168.0.103', 58687)
+ 
+Mon,06 Aug 2018 10:26:28 adbmysql.py[line:38] INFO name 'self' is not defined
+Mon,06 Aug 2018 10:26:46 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 58690) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 10:26:47 analysiscmd.py[line:113] INFO DB Recive data :[21, 255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 16, 64, 66] from IPv4Address(TCP, '192.168.0.103', 58690)
+ 
+Mon,06 Aug 2018 10:26:47 adbmysql.py[line:38] INFO name 'self' is not defined
+Mon,06 Aug 2018 10:27:21 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 58694) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 10:27:21 twisted_tcpserver.py[line:108] INFO IPv4Address(TCP, '192.168.0.103', 58694) device disconnected,the ConnectNum: 0, the max ConnectNum 1
+
+Mon,06 Aug 2018 10:27:22 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 58695) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 10:27:23 analysiscmd.py[line:113] INFO DB Recive data :[21, 255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 16, 64, 66] from IPv4Address(TCP, '192.168.0.103', 58695)
+ 
+Mon,06 Aug 2018 10:27:23 adbmysql.py[line:38] INFO 'NoneType' object has no attribute 'runInteraction'
+Mon,06 Aug 2018 12:00:50 twisted_tcpserver.py[line:108] INFO IPv4Address(TCP, '192.168.0.103', 58695) device disconnected,the ConnectNum: 0, the max ConnectNum 1
+
+Mon,06 Aug 2018 12:00:51 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 60295) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 12:00:52 twisted_tcpserver.py[line:108] INFO IPv4Address(TCP, '192.168.0.103', 60295) device disconnected,the ConnectNum: 0, the max ConnectNum 1
+
+Mon,06 Aug 2018 12:01:31 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 60302) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 12:01:33 analysiscmd.py[line:113] INFO DB Recive data :[21, 255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 16, 64, 66] from IPv4Address(TCP, '192.168.0.103', 60302)
+ 
+Mon,06 Aug 2018 12:03:22 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 60322) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 12:03:23 analysiscmd.py[line:113] INFO DB Recive data :[21, 255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 16, 64, 66] from IPv4Address(TCP, '192.168.0.103', 60322)
+ 
+Mon,06 Aug 2018 12:03:23 adbmysql.py[line:61] INFO INSERT INTO dbdevice (UUID,TOTAL_POWER,ONOFF,TIMES) VALUES ('00000000001','0.16','OFF','2018-08-06 12:03:23')
+Mon,06 Aug 2018 13:03:26 twisted_tcpserver.py[line:132] INFO IPv4Address(TCP, '192.168.0.103', 61121) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+Mon,06 Aug 2018 13:03:28 analysiscmd.py[line:113] INFO DB Recive data :[21, 255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 16, 64, 66] from IPv4Address(TCP, '192.168.0.103', 61121)
+ 
+Mon,06 Aug 2018 13:03:28 adbmysql.py[line:58] INFO INSERT INTO dbdevice (UUID,TOTAL_POWER,ONOFF,TIMES) VALUES ('00000000001','0.16','OFF','2018-08-06 13:03:28')
