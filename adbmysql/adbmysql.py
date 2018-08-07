@@ -1,7 +1,11 @@
-#-*- coding : utf-8 -*-
+#_*_ coding : utf-8 _*_
 from twisted.enterprise import adbapi
 import pymysql
 import logging
+
+''' logging setting '''
+
+sqllogging = logging.getLogger("login info")
 
 class TwistedMysql(object):
 	"""docstring for  TwistedMysql  异步使用mysql"""
@@ -24,21 +28,18 @@ class TwistedMysql(object):
 
 		'''异步数据库操作初始化线程启动，以及注册方式错误回调函数'''
 		try:
-
 			query=cls.dbpooldict['dbpool'].runInteraction(cls.insterdata,**kwargs)
 			#query=cls.dbpooldict['dbpool'].runInteraction(cls.insterdatatest)
-
 			query.addErrback(cls.errorhanle)
-
 		except Exception as e:
 
-			logging.info(e)
+			sqllogging.info(e)
 
 		
 	@classmethod
 	def errorhanle(cls):
 
-		print ('error')
+		sqllogging.info('error')
 
 	@classmethod
 	def insterdatatest(cls,cursor):
@@ -52,16 +53,14 @@ class TwistedMysql(object):
 		try:
 			data=[d for d in kwargs.keys()]
 
-			inter_information = "INSERT INTO {} ({},{},{},{}) VALUES (\'{}\',\'{}\',\'{}\',\'{}\')"\
+			inter_information =r"INSERT INTO {} ({},{},{},{}) VALUES ('{}','{}','{}','{}')\n"\
 								.format(kwargs['table'],data[1],data[2],data[3],data[4],kwargs['UUID'],kwargs['TOTAL_POWER'],kwargs['ONOFF'],kwargs['TIMES'])
 			cursor.execute(inter_information)
-			logging.info(inter_information)
+			sqllogging.info(inter_information)
 
 		except Exception as e:
 
 			logging.info('sql error:'+str(e))
-
-
 		
 
 

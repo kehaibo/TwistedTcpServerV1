@@ -9,8 +9,25 @@ from CRC16 import CRC16
 from cmdanalysis  import analysiscmd
 import logging
 import time
+import sys
 from datetime import datetime
 
+''' logging setting  for data log '''
+mylogger=logging.getLogger('device_data')
+mylogger.setLevel(level=logging.DEBUG)
+stdprintf = logging.StreamHandler()
+formatter=logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+stdprintf.setFormatter(formatter)
+if os.name !='nt':
+	outputfile = logging.FileHandler('/home/Iotserver/TwistedTcpServerV3-addadbapi/log/data.txt')
+	formatter=logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+	outputfile.setFormatter(formatter)
+	mylogger.addHandler(outputfile)
+	if sys.argv[1]=='True':
+		mylogger.addHandler(stdprintf)
+else:
+	outputfile = logging.FileHandler('E:\Python-L\TwistedTcpServerV3-addadbapi\log\data.txt')
+	mylogger.addHandler(outputfile)
 
 
 
@@ -22,18 +39,6 @@ class CmdAnalysic(object):
 		self.device_ip=device_ip
 		self.uuid = ''
 		self.datalen=datalen
-		self.mylogger=logging.getLogger('device data')
-		self.mylogger.setLevel
-		stdprintf = logging.StreamHandler()
-		if os.name !='nt':
-			outputfile = logging.FileHandler('/home/Iotserver/TwistedTcpServerV3-addadbapi/log/data.txt')
-			self.mylogger.addHandler(outputfile)
-			if argv[1]=='True':
-				self.mylogger.addHandler(stdprintf)
-		else:
-			outputfile = logging.FileHandler('E:\Python-L\TwistedTcpServerV3-addadbapi\log\data.txt')
-			self.mylogger.addHandler(outputfile)
-
 
 	def getuuid(self):
 
@@ -52,13 +57,12 @@ class CmdAnalysic(object):
 
 class DBcmdanalysic(CmdAnalysic):
 	"""docstring for DBcmdanalysic 电表设备"""
+	
 	def __init__(self,data,datalen,device_ip):
-
 		super(DBcmdanalysic,self).__init__(data,datalen,device_ip)
 		self.temp=''
 		self.power=''
 		self.switchstatus='' #开关状态
-
 
 	def getuuid(self):
 		''' get uuid from data ,as device unique identification '''
@@ -69,23 +73,15 @@ class DBcmdanalysic(CmdAnalysic):
 	def gettotalpower(self):
 		'''获取总电量数据'''
 		power = 0
-
 		power = self.data[15]<<32|self.data[16]<<8|self.data[17]
-
 		self.power = str(power)+'.'+str(self.data[18])
-		
 		return self.power
-
 
 	def getdata(self,function,**kwagrs):
 		''' get device data '''
-
 		datadict=dict()
-
 		try:
-
 			markindex = int(self.data.index(0x15))
-		
 		except ValueError:
 
 			#self.transport.abortConnection()
@@ -110,7 +106,7 @@ class DBcmdanalysic(CmdAnalysic):
 					kwagrs['UUID']=self.getuuid()
 					kwagrs['TOTAL_POWER']=self.gettotalpower()
 					kwagrs['TIMES']=datetime.strptime(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),"%Y-%m-%d %H:%M:%S")
-					self.mylogger.info("DB Recive data :{} from {}\n ".format(databuf,self.device_ip))	
+					mylogger.info("DB Recive data :{} from {}\n ".format(databuf,self.device_ip))	
 					function(**kwagrs)
 				else:
 
@@ -122,7 +118,7 @@ class DBcmdanalysic(CmdAnalysic):
 					
 			else : #数据错误
 
-				self.mylogger.info("CRC ERROR :Recive error data :{} from {} at {}\n ".format(databuf,self.device_ip,time.strftime("%Y-%m_%d %H:%M:%S",time.localtime())))				
+				mylogger.info("CRC ERROR :Recive error data :{} from {} at {}\n ".format(databuf,self.device_ip,time.strftime("%Y-%m_%d %H:%M:%S",time.localtime())))				
 				
 				self.datalen=self.datalen-0x15
 			

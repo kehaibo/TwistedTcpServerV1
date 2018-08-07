@@ -1,5 +1,5 @@
 #TCPSerever
-#-*_ coding:utf-8 -*-
+#-*- coding:utf-8 -*-
 import os
 if os.name =='nt':
 	from twisted.internet import iocpreactor
@@ -34,14 +34,7 @@ class Echo(protocol.Protocol):#处理事件程序
 		self.uuid = ''
 		self.temp = ''
 		self.loglocal = loglocal
-		self.mylogger=logging.getLogger()
-		stdprintf = logging.StreamHandler()
-		if os.name !='nt':
-			if argv[1]=='True':
-				self.mylogger.addHandler(stdprintf)
-		else:
-			self.mylogger.addHandler(stdprintf)
-		
+
 	def dataReceived(self,data):
 
 		#cliend_data=binascii.b2a_hex(data) #ASIIC码转16字符
@@ -66,11 +59,11 @@ class Echo(protocol.Protocol):#处理事件程序
 
 				else: #不是正确的指令
 							
-					self.mylogger.info("NO this type device")
+					mylogger.info("NO this type device")
 					
 			elif cliend_data[1]==0xFE and cliend_data[0]==0x15: #判断是否为不定长度指令数据，透传等..
 				
-				self.mylogger.info("variable len!!!")
+				mylogger.info("variable len!!!")
 		
 			else: #不是正确的指令	         
 
@@ -88,7 +81,7 @@ class Echo(protocol.Protocol):#处理事件程序
 
 		except AttributeError:
 
-			self.mylogger.info('ERROR :Django client not login\n')
+			mylogger.info('ERROR :Django client not login\n')
 
 	def connectionLost(self, reason):
 		"""
@@ -104,7 +97,7 @@ class Echo(protocol.Protocol):#处理事件程序
 
 		ConnectNum = ConnectNum - 1
 
-		logging.info("{} device disconnected,the ConnectNum: {}, the max ConnectNum {}\n"
+		mylogger.info("{} device disconnected,the ConnectNum: {}, the max ConnectNum {}\n"
 					.format(self.transport.getPeer(),ConnectNum,ConnetNum_Max))    
 	
 	def connectionMade(self):
@@ -128,7 +121,7 @@ class Echo(protocol.Protocol):#处理事件程序
 #					.format(self.transport.getPeer(),ConnectNum,ConnetNum_Max,time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))
 #		except :
 #			print("信息无法写入日志或路径问题 at {}\n".format(time.strftime(" %Y-%m-%d %H:%M:%S",time.localtime())))	
-		logging.info("{} login success,the ConnectNum is {} ,the max connectNum is {}\n "
+		mylogger.info("{} login success,the ConnectNum is {} ,the max connectNum is {}\n "
 					.format(self.transport.getPeer(),ConnectNum,ConnetNum_Max))	
 						
 	
@@ -148,13 +141,13 @@ if __name__ == '__main__':
 	mysqlsetting =	{   'host':'localhost',
 						'port':3306,
 						'user':'root',
-						'passwd':'',
-						'db':'device',
+						'passwd':'123456',
+						'db':'DEVICE',
 						'use_unicode':True,
 						'charset':'utf8'
 					} 
 	dbdatamodel = {	
-					'table':'dbdevice',
+					'table':'DBDEVICE',
 					'UUID':'',
 					'TOTAL_POWER':'',
 					'ONOFF':'OFF',
@@ -166,13 +159,36 @@ if __name__ == '__main__':
 	else:
 		loglocal='/home/Iotserver/TwistedTcpServerV3-addadbapi/log/log.txt'
 
-	adbmysql.TwistedMysql.connectsetting(**mysqlsetting)
-	#TwistedMysql.interctionthread(**data)
 
-	logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-								datefmt='%a,%d %b %Y %H:%M:%S',
-                				filename=loglocal,
-                				filemode='a')																																																																																																																																																																																																																																		
+	''' logging setting for login info '''
+	mylogger=logging.getLogger('login info')
+	mylogger.setLevel(level=logging.DEBUG)
+	stdprintf = logging.StreamHandler()
+	stdprintf.setLevel(logging.DEBUG)
+	formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+	stdprintf.setFormatter(formatter)
+	if os.name !='nt':
+		outputfile=logging.FileHandler(loglocal)
+		outputfile.setLevel(logging.DEBUG)
+		outputfile.setFormatter(formatter)
+		mylogger.addHandler(outputfile)
+		if argv[1]=='True':
+			mylogger.addHandler(stdprintf)
+		
+	else:
+		if argv[1]=='True':
+			mylogger.addHandler(stdprintf)
+		outputfile=logging.FileHandler(loglocal)
+		#outputfile.setLevel(logging.INFO)
+		outputfile.setFormatter(formatter)
+		mylogger.addHandler(outputfile)
+
+	try:
+		adbmysql.TwistedMysql.connectsetting(**mysqlsetting)
+	#TwistedMysql.interctionthread(**data)
+	except Exception as e:
+		
+		logging.info(e)
 
 	Devfactory=EchoFactory()
 
