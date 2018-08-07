@@ -146,13 +146,13 @@ if __name__ == '__main__':
 						'use_unicode':True,
 						'charset':'utf8'
 					} 
-	dbdatamodel = {	
-					'table':'DBDEVICE',
-					'UUID':'',
-					'TOTAL_POWER':'',
-					'ONOFF':'OFF',
-					'TIMES':''
-				}
+	dbdatamodel =   {	
+						'table':'DBDEVICE',
+						'UUID':'',
+						'TOTAL_POWER':'',
+						'ONOFF':'OFF',
+						'TIMES':''
+				    }
 
 	if os.name =='nt':
 		loglocal = 'E:\Python-L\TwistedTcpServerV3-addadbapi\log\log.txt'
@@ -161,27 +161,31 @@ if __name__ == '__main__':
 
 
 	''' logging setting for login info '''
-	mylogger=logging.getLogger('login info')
-	mylogger.setLevel(level=logging.DEBUG)
-	stdprintf = logging.StreamHandler()
-	stdprintf.setLevel(logging.DEBUG)
-	formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-	stdprintf.setFormatter(formatter)
-	if os.name !='nt':
-		outputfile=logging.FileHandler(loglocal)
-		outputfile.setLevel(logging.DEBUG)
-		outputfile.setFormatter(formatter)
-		mylogger.addHandler(outputfile)
-		if argv[1]=='True':
+	try:
+		mylogger=logging.getLogger('login info')
+		mylogger.setLevel(level=logging.DEBUG)
+		stdprintf = logging.StreamHandler()
+		stdprintf.setLevel(logging.DEBUG)
+		formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+		stdprintf.setFormatter(formatter)
+		if os.name !='nt':
+			outputfile=logging.FileHandler(loglocal)
+			outputfile.setLevel(logging.DEBUG)
+			outputfile.setFormatter(formatter)
+			mylogger.addHandler(outputfile)
+			if argv[1]=='True':
+				mylogger.addHandler(stdprintf)
+			
+		else:
+			outputfile=logging.FileHandler(loglocal)
+			outputfile.setLevel(logging.INFO)
+			outputfile.setFormatter(formatter)
 			mylogger.addHandler(stdprintf)
-		
-	else:
-		if argv[1]=='True':
-			mylogger.addHandler(stdprintf)
-		outputfile=logging.FileHandler(loglocal)
-		#outputfile.setLevel(logging.INFO)
-		outputfile.setFormatter(formatter)
-		mylogger.addHandler(outputfile)
+			mylogger.addHandler(outputfile)
+	except Exception as e:
+
+		print(e)
+
 
 	try:
 		adbmysql.TwistedMysql.connectsetting(**mysqlsetting)

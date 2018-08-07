@@ -12,20 +12,23 @@ class TwistedMysql(object):
 
 	dbpooldict = {}
 
+
 	def __init__(self):
 
 		pass
 
+
 	@classmethod		
 	def connectsetting(cls,**kwargs):
-
 		'''初始化mysql异步连接池'''
+		try:
+			cls.dbpooldict['dbpool'] = adbapi.ConnectionPool("pymysql",**kwargs) 
+		except Exception as e:
+			sqllogging.info(e)
 
-		cls.dbpooldict['dbpool'] = adbapi.ConnectionPool("pymysql",**kwargs) 
 
 	@classmethod
 	def interctionthread(cls,**kwargs):
-
 		'''异步数据库操作初始化线程启动，以及注册方式错误回调函数'''
 		try:
 			query=cls.dbpooldict['dbpool'].runInteraction(cls.insterdata,**kwargs)
@@ -38,8 +41,8 @@ class TwistedMysql(object):
 		
 	@classmethod
 	def errorhanle(cls):
-
 		sqllogging.info('error')
+
 
 	@classmethod
 	def insterdatatest(cls,cursor):
@@ -47,17 +50,17 @@ class TwistedMysql(object):
 		inter_information = "INSERT INTO dbdevice (UUID,TOTAL_POWER,ONOFF) VALUES ('000000000002','222.44','OFF')"
 		cursor.execute(inter_information)
 
+
 	@classmethod
 	def insterdata(cls,cursor,**kwargs):
 		''' 插入数据'''
 		try:
 			data=[d for d in kwargs.keys()]
 
-			inter_information =r"INSERT INTO {} ({},{},{},{}) VALUES ('{}','{}','{}','{}')\n"\
+			inter_information =r"INSERT INTO {} ({},{},{},{}) VALUES ('{}','{}','{}','{}')"\
 								.format(kwargs['table'],data[1],data[2],data[3],data[4],kwargs['UUID'],kwargs['TOTAL_POWER'],kwargs['ONOFF'],kwargs['TIMES'])
 			cursor.execute(inter_information)
-			sqllogging.info(inter_information)
-
+			sqllogging.info(inter_information+'\n')
 		except Exception as e:
 
 			logging.info('sql error:'+str(e))

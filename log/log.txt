@@ -14,3 +14,16 @@
  
 2018-08-07 13:58:59,752 - login info - INFO - IPv4Address(TCP, '116.23.4.11', 53746) device disconnected,the ConnectNum: 0, the max ConnectNum 1
 
+2018-08-07 14:19:49,011 - login info - INFO - IPv4Address(TCP, '192.168.0.113', 54331) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+2018-08-07 16:11:44,689 - login info - INFO - IPv4Address(TCP, '192.168.0.113', 57434) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+2018-08-07 16:12:08,286 - login info - INFO - IPv4Address(TCP, '192.168.0.113', 57442) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+2018-08-07 16:12:10,136 - login info - INFO - INSERT INTO DBDEVICE (UUID,TOTAL_POWER,ONOFF,TIMES) VALUES ('00000000001','0.16','OFF','2018-08-07 16:12:09')
+2018-08-07 16:12:25,825 - login info - INFO - INSERT INTO DBDEVICE (UUID,TOTAL_POWER,ONOFF,TIMES) VALUES ('00000000001','0.16','OFF','2018-08-07 16:12:25')
+2018-08-07 16:13:57,726 - login info - INFO - INSERT INTO DBDEVICE (UUID,TOTAL_POWER,ONOFF,TIMES) VALUES ('00000000001','0.16','OFF','2018-08-07 16:13:57')
+2018-08-07 16:14:18,069 - login info - INFO - IPv4Address(TCP, '192.168.0.113', 57487) login success,the ConnectNum is 1 ,the max connectNum is 1
+ 
+2018-08-07 16:14:19,161 - login info - INFO - INSERT INTO DBDEVICE (UUID,TOTAL_POWER,ONOFF,TIMES) VALUES ('00000000001','0.16','OFF','2018-08-07 16:14:19')
+

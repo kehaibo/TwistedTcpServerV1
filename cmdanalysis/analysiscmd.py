@@ -27,9 +27,10 @@ if os.name !='nt':
 		mylogger.addHandler(stdprintf)
 else:
 	outputfile = logging.FileHandler('E:\Python-L\TwistedTcpServerV3-addadbapi\log\data.txt')
+	formatter=logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+	outputfile.setFormatter(formatter)
 	mylogger.addHandler(outputfile)
-
-
+	mylogger.addHandler(stdprintf)
 
 class CmdAnalysic(object):
 	"""docstring for CmdAnalysic 命令解析的父类"""
