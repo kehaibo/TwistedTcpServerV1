@@ -27,16 +27,15 @@ if os.name !='nt':
 		mylogger.addHandler(stdprintf)
 else:
 	outputfile = logging.FileHandler('E:\Python-L\TwistedTcpServerV3-addadbapi\log\data.txt')
-	formatter=logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-	outputfile.setFormatter(formatter)
 	mylogger.addHandler(outputfile)
-	mylogger.addHandler(stdprintf)
+
+
 
 class CmdAnalysic(object):
 	"""docstring for CmdAnalysic 命令解析的父类"""
 	def __init__(self,data,datalen,device_ip):
-
-		self.data = data 
+		self.data=[]
+		self.data.append(data)
 		self.device_ip=device_ip
 		self.uuid = ''
 		self.datalen=datalen
@@ -80,57 +79,40 @@ class DBcmdanalysic(CmdAnalysic):
 
 	def getdata(self,function,**kwagrs):
 		''' get device data '''
-		datadict=dict()
 		try:
 			markindex = int(self.data.index(0x15))
 		except ValueError:
-
-			#self.transport.abortConnection()
+		#	self.transport.abortConnection()
 			self.datalen=0 #出现乱码时，直接退出本次数据处理过程
 
 		try:
-		
+			#logging.info(str(self.data)+'\n')
 			databuf=self.data[markindex:0x15]#数据体切割
-
 		except UnboundLocalError:
-
 			self.datalen=0 #出现乱码时，直接退出本次数据处理过程
 
 		try:
-
 			CRCL,CRCH=CRC16.CRC16_1(databuf[:-2],len(databuf[:-2]))#crc校验
 
 			if CRCL==databuf[-2] and CRCH==databuf[-1]:
 
 				if databuf[14] == 0x01 : #电量数据类型
-
 					kwagrs['UUID']=self.getuuid()
 					kwagrs['TOTAL_POWER']=self.gettotalpower()
 					kwagrs['TIMES']=datetime.strptime(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),"%Y-%m-%d %H:%M:%S")
 					mylogger.info("DB Recive data :{} from {}\n ".format(databuf,self.device_ip))	
 					function(**kwagrs)
 				else:
-
-					raise Exception('data type error')			
-				
+					raise Exception('data type error')		
 				del self.data[markindex:markindex+int(self.data[0])]#删除数据体已经截取的部分
-				
 				self.datalen=self.datalen-0x15
-					
 			else : #数据错误
-
 				mylogger.info("CRC ERROR :Recive error data :{} from {} at {}\n ".format(databuf,self.device_ip,time.strftime("%Y-%m_%d %H:%M:%S",time.localtime())))				
-				
-				self.datalen=self.datalen-0x15
-			
-				if self.datalen<=0:
-				
-					self.datalen=0
-
+				if len(databuf)<0x15:
+					self.data.append(self.data[markindex:len(self.databuf)])
+					self.datalen=self.datalen-len(databuf)
 		except 	IndexError :
-
 			self.datalen=0 #出现乱码时，直接退出本次数据处理过程
-
 		return self.datalen
 
 

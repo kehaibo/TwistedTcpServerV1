@@ -4,7 +4,6 @@ import os
 if os.name =='nt':
 	from twisted.internet import iocpreactor
 	iocpreactor.install()
-
 from twisted.internet import reactor,protocol
 from twisted.python import log
 from cmdanalysis  import analysiscmd
@@ -36,41 +35,29 @@ class Echo(protocol.Protocol):#处理事件程序
 		self.loglocal = loglocal
 
 	def dataReceived(self,data):
-
+		'''数据接收及处理'''
 		#cliend_data=binascii.b2a_hex(data) #ASIIC码转16字符
-
 		cliend_data=list(map(lambda s:s,data))#字符串转list		
-		
+		#self.databuf.append(cliend_data)
+		#mylogger.info(str(cliend_data)+'\n')
 		self.datalen=len(data)
-
 		while self.datalen:
-
 			if  cliend_data[0]==0x15 and cliend_data[1]==0xFF: #判断是否为固定长度指令数据
-
 				if cliend_data[2]==0x01:#电表设备
-
 					dbobj=analysiscmd.DBcmdanalysic(cliend_data,self.datalen,self.transport.getPeer())
 					#adbmysql.TwistedMysql.connectsetting(**db_settings)
 					self.datalen=dbobj.getdata(adbmysql.TwistedMysql.interctionthread,**dbdatamodel)
-
 				elif cliend_data[2]==0x02:#空调设备
-
 					self.mylogger.info("KT device")					
-
 				else: #不是正确的指令
-							
 					mylogger.info("NO this type device")
-					
 			elif cliend_data[1]==0xFE and cliend_data[0]==0x15: #判断是否为不定长度指令数据，透传等..
-				
 				mylogger.info("variable len!!!")
-		
 			else: #不是正确的指令	         
-
-				self.mylogger.info("{} cmd error,cuting down connection!!! \n".format(self.transport.getPeer()))
+				mylogger.info("{} cmd error,cuting down connection!!! \n".format(self.transport.getPeer()))
 				self.transport.abortConnection()
 				break
-			
+
 	def SEND(self,uuid,databody):
 
 		try :
@@ -146,13 +133,13 @@ if __name__ == '__main__':
 						'use_unicode':True,
 						'charset':'utf8'
 					} 
-	dbdatamodel =   {	
-						'table':'DBDEVICE',
-						'UUID':'',
-						'TOTAL_POWER':'',
-						'ONOFF':'OFF',
-						'TIMES':''
-				    }
+	dbdatamodel = {	
+					'table':'DBDEVICE',
+					'UUID':'',
+					'TOTAL_POWER':'',
+					'ONOFF':'OFF',
+					'TIMES':''
+				}
 
 	if os.name =='nt':
 		loglocal = 'E:\Python-L\TwistedTcpServerV3-addadbapi\log\log.txt'
@@ -161,31 +148,27 @@ if __name__ == '__main__':
 
 
 	''' logging setting for login info '''
-	try:
-		mylogger=logging.getLogger('login info')
-		mylogger.setLevel(level=logging.DEBUG)
-		stdprintf = logging.StreamHandler()
-		stdprintf.setLevel(logging.DEBUG)
-		formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-		stdprintf.setFormatter(formatter)
-		if os.name !='nt':
-			outputfile=logging.FileHandler(loglocal)
-			outputfile.setLevel(logging.DEBUG)
-			outputfile.setFormatter(formatter)
-			mylogger.addHandler(outputfile)
-			if argv[1]=='True':
-				mylogger.addHandler(stdprintf)
-			
-		else:
-			outputfile=logging.FileHandler(loglocal)
-			outputfile.setLevel(logging.INFO)
-			outputfile.setFormatter(formatter)
+	mylogger=logging.getLogger('login info')
+	mylogger.setLevel(level=logging.DEBUG)
+	stdprintf = logging.StreamHandler()
+	stdprintf.setLevel(logging.DEBUG)
+	formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+	stdprintf.setFormatter(formatter)
+	if os.name !='nt':
+		outputfile=logging.FileHandler(loglocal)
+		outputfile.setLevel(logging.DEBUG)
+		outputfile.setFormatter(formatter)
+		mylogger.addHandler(outputfile)
+		if argv[1]=='True':
 			mylogger.addHandler(stdprintf)
-			mylogger.addHandler(outputfile)
-	except Exception as e:
-
-		print(e)
-
+		
+	else:
+		if argv[1]=='True':
+			mylogger.addHandler(stdprintf)
+		outputfile=logging.FileHandler(loglocal)
+		#outputfile.setLevel(logging.INFO)
+		outputfile.setFormatter(formatter)
+		mylogger.addHandler(outputfile)
 
 	try:
 		adbmysql.TwistedMysql.connectsetting(**mysqlsetting)
